@@ -1,6 +1,8 @@
 package com.example.pricewatcher.Service.impl;
 
 import com.example.pricewatcher.Service.UserService;
+import com.example.pricewatcher.exception.EmailAlreadyExistsException;
+import com.example.pricewatcher.exception.UserNotFoundException;
 import com.example.pricewatcher.model.User;
 import com.example.pricewatcher.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -19,12 +21,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UUID create(User user) {
+        if(!userRepository.existsByEmail(user.getEmail()) ){
+            throw new EmailAlreadyExistsException(user.getEmail());
+        }
         return userRepository.save(user).getId();
     }
 
     @Override
     public User update(User user, UUID uuid) {
         User existing = findById(uuid);
+        if(!existing.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(user.getEmail()) ){
+            throw new EmailAlreadyExistsException(user.getEmail());
+        }
         existing.setEmail(user.getEmail());
         existing.setPassword(user.getPassword());
         return userRepository.save(user);
@@ -42,6 +50,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(UUID uuid) {
+        if(!userRepository.existsById(uuid) ){
+            throw new UserNotFoundException(uuid);
+        }
         userRepository.deleteById(uuid);
     }
 }
