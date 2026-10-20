@@ -21,7 +21,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UUID create(User user) {
-        if(!userRepository.existsByEmail(user.getEmail()) ){
+        if(userRepository.existsByEmail(user.getEmail()) ){
             throw new EmailAlreadyExistsException(user.getEmail());
         }
         return userRepository.save(user).getId();
@@ -33,9 +33,10 @@ public class UserServiceImpl implements UserService {
         if(!existing.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(user.getEmail()) ){
             throw new EmailAlreadyExistsException(user.getEmail());
         }
+        existing.setName(user.getName());
         existing.setEmail(user.getEmail());
         existing.setPassword(user.getPassword());
-        return userRepository.save(user);
+        return userRepository.save(existing);
     }
 
     @Override
